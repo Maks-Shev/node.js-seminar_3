@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-app.use(express.static('static'));
+
 
 let homeCount = 0;
 let aboutCount = 0;
@@ -33,8 +33,9 @@ function saveCounters() {
 function sendFileWithCount (res, filePath, count) {
     fs.readFile(filePath, 'utf-8', (err, data) => {
         if (err) {
-            console.log(err);
+            console.log('Ошибка сервера', err);
             res.status(500).send('Ошибка сервера');
+            return;
         } else {
            if (data.includes('{{count}}')) {
             const modifiedData = data.replace('{{count}}', count.toString());
@@ -48,23 +49,23 @@ function sendFileWithCount (res, filePath, count) {
 
 loadCounters(); 
 
-app.get('/', (req, res) => {
+app.get('/index.html', (req, res) => {
     homeCount++;
     saveCounters();
-    sendFileWithCount(res, path.join(__dirname, 'static', 'index.html'), homeCount);
+    sendFileWithCount(res, path.join(__dirname, 'static', '/index.html'), homeCount);
 });
 
-app.get('/about', (req, res) => {
+app.get('/about.html', (req, res) => {
     aboutCount++;
     saveCounters();
-    sendFileWithCount(res, path.join(__dirname, 'static', 'about.html'), aboutCount);
+    sendFileWithCount(res, path.join(__dirname, 'static', '/about.html'), aboutCount);
 });
+
+app.use(express.static('static'));
 
 app.use((req, res) => {
     res.status(404).send('<h1>Страница не найдена</h1>');
 });
-
-
 
 app.listen(port, () => console.log(`Сервер запущен на порту: ${port}!`)) ;
 
